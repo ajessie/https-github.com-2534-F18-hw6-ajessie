@@ -6,7 +6,7 @@
 
 
 #define LEFT_THRESHOLD  0x1000
-#define RIGHT_THRESHOLD 0x3000
+
 
 
 // This function initializes all the peripherals except graphics
@@ -41,11 +41,7 @@ int main(void)
         bool joyStickPushedtoLeft = false;
         drawXY(&g_sContext, vx, vy);
 
-        if (vx > RIGHT_THRESHOLD)
-        {
-            joyStickPushedtoRight = true;
-        }
-        else if (vx < LEFT_THRESHOLD)
+        if (vx < LEFT_THRESHOLD)
         {
             joyStickPushedtoLeft = true;
         }
