@@ -39,6 +39,7 @@ int main(void)
         getSampleJoyStick(&vx, &vy);
         bool joyStickPushedtoRight = false;
         bool joyStickPushedtoLeft = false;
+        drawXY(&g_sContext, vx, vy);
 
         if (vx > RIGHT_THRESHOLD)
         {

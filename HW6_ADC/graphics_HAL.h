@@ -13,5 +13,6 @@
 void draw_Base(Graphics_Context *g_sContext_p);
 void MoveCircle(Graphics_Context *g_sContext_p, bool moveToLeft, bool moveToRight);
 void InitGraphics(Graphics_Context *g_sContext_p);
+void drawXY(Graphics_Context *g_sContext_p, unsigned int x, unsigned int y);
 
 #endif /* GRAPHICS_HAL_H_ */

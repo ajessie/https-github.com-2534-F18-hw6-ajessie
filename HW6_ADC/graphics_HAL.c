@@ -8,6 +8,30 @@
 #include <ti/grlib/grlib.h>
 #include "LcdDriver/Crystalfontz128x128_ST7735.h"
 
+void make_5digit_NumString(unsigned int num, char *string)
+{
+    string[0]= (        num  / 10000) +'0';
+    string[1]= ((num%10000) / 1000) +'0';
+    string[2]= ((num%1000) / 100) +'0';
+    string[3]= ((num%100) / 10) +'0';
+    string[4]= ((num%10) / 1) +'0';
+    string[5]= 0;
+}
+
+void drawXY(Graphics_Context *g_sContext_p, unsigned int x, unsigned int y)
+{
+    char string[6];
+
+    Graphics_drawString(g_sContext_p, "x=", -1, 10, 5, true);
+    make_5digit_NumString(x, string);
+    Graphics_drawString(g_sContext_p, string, -1, 30, 5, true);
+
+    Graphics_drawString(g_sContext_p, "y=", -1, 10, 15, true);
+    make_5digit_NumString(y, string);
+    Graphics_drawString(g_sContext_p, string, -1, 30, 15, true);
+}
+
+
 void draw_Base(Graphics_Context *g_sContext_p)
 {
     Graphics_Rectangle R;
