@@ -13,7 +13,8 @@ void initialize();
 #define PWM_PERIOD_CYLCLES ONE_MILLISEC_COUNT
 
 // Duty cycle as a fraction (between 0 and 1)
-#define DUTY_CYCLE_FRACTION 0.001
+#define DUTY_CYCLE_FRACTION         0.002
+#define DUTY_CYCLE_FRACTION_RED     0.005
 
 // The number of on cycles (Timer_A counter cycles)
 #define BLUE_ON_CYCLES (DUTY_CYCLE_FRACTION * PWM_PERIOD_CYLCLES)
@@ -21,9 +22,18 @@ void initialize();
 // The number of off cycles (Timer_A counter cycles)
 #define BLUE_OFF_CYCLES ((1-DUTY_CYCLE_FRACTION) * PWM_PERIOD_CYLCLES)
 
+// The number of on cycles (Timer_A counter cycles)
+#define RED_ON_CYCLES (DUTY_CYCLE_FRACTION * PWM_PERIOD_CYLCLES)
+
+// The number of off cycles (Timer_A counter cycles)
+#define RED_OFF_CYCLES ((1-DUTY_CYCLE_FRACTION_RED) * PWM_PERIOD_CYLCLES)
+
+
 // Since we start at "off" cycle, the first change comes once the number of "off" cycles are over
 // With a different starting point or a different timer_A mode, this value could be different to achieve the same duty cycle
 #define BLU_COMPARE_CYCLES    BLUE_OFF_CYCLES
+
+#define RED_COMPARE_CYCLES    RED_OFF_CYCLES
 
 // The below set of choices are not programmer's.
 // We need to study the Booster board and Launchpad board diagrams for this info.
@@ -31,7 +41,9 @@ void initialize();
 // The BLUE LED is wired to TA2.1.
 // As the programmer we cannot change this. It is decided by the board designer
 #define BLU_TIMER    TIMER_A2_BASE
+#define RED_TIMER    TIMER_A1_BASE
 #define BLU_CHANNEL  TIMER_A_CAPTURECOMPARE_REGISTER_1
+#define RED_CHANNEL  TIMER_A_CAPTURECOMPARE_REGISTER_2
 
 #define BLOCKING    0
 #define BLOCK_COUNT 100000
@@ -48,6 +60,13 @@ void initPWM()
             GPIO_PORT_P5,
             GPIO_PIN6,
             GPIO_PRIMARY_MODULE_FUNCTION);
+    GPIO_setAsOutputPin    (GPIO_PORT_P2,    GPIO_PIN6);
+    GPIO_setOutputLowOnPin (GPIO_PORT_P2,    GPIO_PIN6);
+    GPIO_setAsPeripheralModuleFunctionOutputPin(
+            GPIO_PORT_P2,
+            GPIO_PIN6,
+            GPIO_PRIMARY_MODULE_FUNCTION);
+
 }
 
 
@@ -63,10 +82,23 @@ int main(void) {
           TIMER_A_OUTPUTMODE_SET_RESET,   // The OC mode. We choose this such that we can achieve the waveform we are interested in.
           BLU_COMPARE_CYCLES              // The OC value. This is the value that when the counter hits it, something happens to the waveform
   };
+
+  WDT_A_holdTimer();
+  Timer_A_PWMConfig pwmConfig_red = {
+          TIMER_A_CLOCKSOURCE_SMCLK,      // The source clock is the system clock (3MHz)
+          TIMER_A_CLOCKSOURCE_DIVIDER_1,  // The clock divider is 1
+          PWM_PERIOD_CYLCLES,             // The # of counter cycles in one PWM round (period of PWM in terms of counter cycle)
+          RED_CHANNEL,                    // The output register used for OC operation. The programmer does not choose this.
+          TIMER_A_OUTPUTMODE_SET_RESET,   // The OC mode. We choose this such that we can achieve the waveform we are interested in.
+          RED_COMPARE_CYCLES              // The OC value. This is the value that when the counter hits it, something happens to the waveform
+  };
+
+
   initPWM();
 
-  // The below line starts generating the pulse
+  // The below lines starts generating the pulses
   Timer_A_generatePWM(BLU_TIMER, &pwmConfig_blu);
+  Timer_A_generatePWM(RED_TIMER, &pwmConfig_red);
 
   int i;
 
@@ -74,8 +106,10 @@ int main(void) {
   {
       // The blocking code.
       turnOn_LaunchpadLED1();
+      turnOn_BoosterpackLED_red();
       for (i=0; i<(BLOCK_COUNT * BLOCKING); i++);
       turnOff_LaunchpadLED1();
+      turnOff_BoosterpackLED_red();
 
       // Nothing needs to be done here for handling the pulse as the Timer_A automatically takes care of it and the processor is hands off.
   }
