@@ -6,6 +6,7 @@
 
 
 #define LEFT_THRESHOLD  0x1000
+#define RIGHT_THRESHOLD 0x36B0
 
 
 
@@ -44,6 +45,10 @@ int main(void)
         if (vx < LEFT_THRESHOLD)
         {
             joyStickPushedtoLeft = true;
+        }
+
+        else if (vx > RIGHT_THRESHOLD ){
+            joyStickPushedtoRight = true;
         }
 
         ModifyLEDColor(joyStickPushedtoLeft,joyStickPushedtoRight);
